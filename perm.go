@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/gonum/stat/combin"
 )
 
 func f(from string) {
@@ -64,18 +66,178 @@ func _scorePerm(arr []string) int {
 	return k
 }
 
+func _runPerms(arr []string) (int, []string) {
+	perms := permutations(arr)
+	//fmt.Println(len(perms))
+	bestScore := 5000
+	bestPerm := []string{}
+	for i := 0; i < len(perms); i++ {
+		score := _scorePerm(perms[i])
+		if score < bestScore {
+			bestScore = score
+			bestPerm = perms[i]
+		}
+	}
+	return bestScore, bestPerm
+}
+
 func main() {
 
-	/*arr := []string{
-	"100-79",
-	"103-71",
-	"122-82",
-	"123-90",
-	"124-85",
-	"125-73",
-	"126-91",
-	"128-92",
-	"174-90"}*/
+	allGroups := []string{
+		"516-0",
+		"564-0",
+		"667-0",
+		"643-0",
+		"656-0",
+		"580-0",
+	}
+
+	bs, bp := _runPerms(allGroups)
+	fmt.Printf("Best score: %v\n", bs)
+	fmt.Printf("Best perm: %v\n", bp)
+
+	group0 := []string{
+		"120-26",
+		"84-42",
+		"148-77",
+		"148-48",
+		"79-45",
+		"172-24",
+	}
+
+	/*
+		--36
+		"126-75",
+		"122-82",
+		"120-82",
+		"120-88",
+		"123-90",
+		"126-90",
+		"126-91",
+		"125-92",
+		"124-97",
+		"79-45",
+
+		--76
+		"120-56",
+		"121-59",
+		"118-63",
+		"118-67",
+		"123-70",
+		"125-73",
+		"122-80",
+		"124-85",
+		"95-83",
+		"120-26",
+
+		--80
+		91-72
+		115-71
+		114-69
+		125-64
+		128-76
+		128-79
+		126-88
+		123-90
+		122-89
+		"84-42",
+
+		--102
+		92-56
+		100-79
+		115-76
+		122-93
+		128-92
+		127-95
+		127-94
+		132-94
+		138-88
+		"172-24",
+
+		--114
+		"103-71",
+		"103-73",
+		"122-72",
+		"126-77",
+		"123-86",
+		"128-87",
+		"128-89",
+		"128-98",
+		"174-90",
+		"148-77",
+
+		--142
+		72-58
+		128-64
+		129-65
+		125-72
+		125-76
+		130-85
+		153-90
+		160-79
+		160-76
+		"148-48",
+	*/
+
+	group1 := []string{
+
+		"128-64",
+		"125-72",
+		"130-85",
+	}
+
+	group2 := []string{
+
+		"153-90",
+		"129-65",
+		"125-76",
+	}
+
+	group3 := []string{
+
+		"72-58",
+
+		"160-79",
+		"160-76",
+	}
+	fmt.Printf("Len of group0: %v\n", len(group0))
+	fmt.Printf("Len of group1: %v\n", len(group1))
+	fmt.Printf("Len of group2: %v\n", len(group2))
+	fmt.Printf("Len of group3: %v\n", len(group3))
+
+	combos := combin.Combinations(len(group1), 3)
+	fmt.Printf("Combos: %v\n", len(combos))
+
+	bestOverall := 5000
+	bestOverallPerm := []string{}
+	for i := 0; i < len(combos); i++ {
+		fmt.Printf("\r%.2f", float64(i/815.00))
+		for j := 0; j < len(combos); j++ {
+			for k := 0; k < len(combos); k++ {
+				combo := []string{}
+				for x := 0; x < 3; x++ {
+					combo = append(combo, group1[combos[i][x]])
+				}
+				for x := 0; x < 3; x++ {
+					combo = append(combo, group2[combos[j][x]])
+				}
+				for x := 0; x < 3; x++ {
+					combo = append(combo, group3[combos[k][x]])
+				}
+				bestScore, bestPerm := _runPerms(combo)
+				if bestScore < bestOverall {
+					bestOverall = bestScore
+					bestOverallPerm = bestPerm
+					fmt.Printf("Best overall score: %v\n", bestOverall)
+					fmt.Printf("Best overall perm: %v\n", bestOverallPerm)
+				}
+			}
+		}
+	}
+
+	fmt.Printf("Best overall score: %v\n", bestOverall)
+	fmt.Printf("Best overall perm: %v\n", bestOverallPerm)
+
 	arr := []string{
 		"103-73",
 		"91-72",
@@ -88,19 +250,10 @@ func main() {
 		"160-79",
 	}
 
-	perms := permutations(arr)
-	fmt.Println(len(perms))
-	bestScore := 5000
-	bestPerm := []string{}
-	for i := 0; i < len(perms); i++ {
-		score := _scorePerm(perms[i])
-		if score < bestScore {
-			bestScore = score
-			bestPerm = perms[i]
-		}
-	}
+	bestScore, bestPerm := _runPerms(arr)
 	fmt.Printf("Best score: %v\n", bestScore)
 	fmt.Printf("Best perm: %v\n", bestPerm)
+
 	//fmt.Println(permutations(arr))
 
 	// Suppose we have a function call `f(s)`. Here's how
@@ -119,10 +272,4 @@ func main() {
 		fmt.Println(msg)
 	}("going")
 
-	// Our two function calls are running asynchronously in
-	// separate goroutines now, so execution falls through
-	// to here. This `Scanln` requires we press a key
-	// before the program exits.
-	fmt.Scanln()
-	fmt.Println("done")
 }
